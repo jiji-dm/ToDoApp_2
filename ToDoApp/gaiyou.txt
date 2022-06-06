@@ -1,0 +1,82 @@
+﻿
+TodoApp概要
+
+１タスク一覧を表示
+２タスクを登録する
+３タスクを編集する
+４タスクを削除する
+
+タスクの内容(*が付くものは必ず記入しなければいけない)
+１*題名（タスク一覧にはここが表示される）
+２*登録日
+３締め日＆時間
+４概要
+５*primaryKey（TaskID) ※1
+
+
+コンソールで表示させる
+
+動作の流れ
+
+タスク一覧を表示させる
+題名(title) + primaryKey(taskID)
+
+表示した上でユーザーに操作を求める
+(➀新規登録 / ➁タスクの表示(編集・削除) / ➂削除 / ④終了)
+
+↓
+
+操作一覧
+
+選択後の処理内容
+➀タスクの登録【void create(Task* task_ptr)】
+	タスクの内容を順に記述を求め、新規登録を実行する
+
+➁タスクの確認【void confirmation(Task* task_ptr)】
+	TaskIDを選択
+	選んだTaskIDを全表示させ、実行するコマンドをユーザに求める
+	➀ 編集 ② 削除 ➂ 戻る（一覧に戻る）
+	➀と➁は、入力判定メソッドに処理が移る【methodSelect(int selectNum, int taskNum)】
+
+➂タスクの削除【void delete(Task* task_ptr)】
+	削除するタスクを引数に設定する
+
+④終了することを表示し、終了する
+
+
+入力による判定メソッド【methodSelect(int selectNum, int taskNum)】
+	一覧を表示後の操作コマンドで押された後、
+	コマンド内容によって編集と削除の動作を変え、(selectNum)   ｛編集【void sysInputUpdate(task_ptr)】削除【void delete(Task* task_ptr)】｝
+	TaskIDにデータが入っているかを確認し(taskNum) 編集/削除を実行する
+
+配列を初期化するメソッド【delete(Task* task_ptr)】
+	指定された構造体の中身を全て初期化(元に戻す)する。
+
+構造体の値を入れられたメンバ変数を編集するメソッド【void update(Task* task_ptr)】
+	編集して値を変えられる。
+	注意）更新日・時間も変わります。
+
+
+
+	【全体図】
+
+	一覧表示(ユーザー選択)------→ 新規登録【create(Task* task)】----→ 一覧に戻る
+						  ｜
+						  ｜--→ タスク表示【confirmation(Task* task_ptr)】---→ 編集【methodSelect(int selectNum, int taskNum)】----→【void update(Task* task_ptr)】
+						  ｜												  |-→ 削除【methodSelect(int selectNum, int taskNum)】----→【void delete(Task* task_ptr)】
+						  ｜--→ 削除	【void delete(Task* task_ptr)】	  |-→ 戻る（一覧に戻る）
+						  ｜
+						  ｜--→ 終了
+
+
+
+
+※1 primaryKey(TaskID)に関して
+
+primaryKeyの決定
+	primaryKeyは1から始まる。空いている配列番号(IDが0の構造体を探し、あれば+１をしてprimaryKeyを決める)
+
+primaryKeyの選択
+	ユーザーはprimaryKeyを選択して操作できるようにする
+	primaryKeyは1からとなり、各配列番号は0から
+	つまり選択する際は、選択されたprimaryKey(TaskID) -1をして配列を参照する。
