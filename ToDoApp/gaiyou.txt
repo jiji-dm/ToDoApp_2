@@ -1,82 +1,114 @@
 ﻿
-TodoApp概要
+＜TodoApp概要＞
 
 １タスク一覧を表示
 ２タスクを登録する
 ３タスクを編集する
 ４タスクを削除する
 
-タスクの内容(*が付くものは必ず記入しなければいけない)
-１*題名（タスク一覧にはここが表示される）
-２*登録日
-３締め日＆時間
-４概要
-５*primaryKey（TaskID) ※1
+タスクの内容(構造体 Task型)
+１id ※1			(タスク番号)
+２title			(題名)
+３date			(更新日)
+４deadLine		(期日)
+５mainSubject	(概要)
+
+タスクを登録するとテキストファイルに記述される。
+コンソールアプリを終了してもテキストファイルが残るため、タスクも保存される。
+
+※1）タスク番号に関して
+		タスク番号の決定
+		タスク番号は1から始まる。空いている配列番号(IDが0の構造体を探し、あれば+１をしてタスク番号を決める)
+
+	タスク番号の選択と配列側の操作
+		ユーザーはタスク番号を選択して操作できるようにする
+		タスク番号は1からとなり、各配列番号は0から
+		選択する際は、選択されたタスク番号 -1をして配列を参照する。
 
 
-コンソールで表示させる
+＜テキストファイルの概要＞
+	テキストファイルにはソースファイルに記述された順番通りに記述される。
 
-動作の流れ
-
-タスク一覧を表示させる
-題名(title) + primaryKey(taskID)
-
-表示した上でユーザーに操作を求める
-(➀新規登録 / ➁タスクの表示(編集・削除) / ➂削除 / ④終了)
-
-↓
-
-操作一覧
-
-選択後の処理内容
-➀タスクの登録【void create(Task* task_ptr)】
-	タスクの内容を順に記述を求め、新規登録を実行する
-
-➁タスクの確認【void confirmation(Task* task_ptr)】
-	TaskIDを選択
-	選んだTaskIDを全表示させ、実行するコマンドをユーザに求める
-	➀ 編集 ② 削除 ➂ 戻る（一覧に戻る）
-	➀と➁は、入力判定メソッドに処理が移る【methodSelect(int selectNum, int taskNum)】
-
-➂タスクの削除【void delete(Task* task_ptr)】
-	削除するタスクを引数に設定する
-
-④終了することを表示し、終了する
+	テキストファイルの動きは
+	・記述（新規登録 / 編集更新 / 削除更新 / リスト一覧表示※2）
+	・読み込み（リスト一覧表示）
+ 
+	 ※2) リスト一覧表示時に毎回行うことにより、削除によってソート順が変わり、
+		IDの番号が変わってしまうため、リスト一覧時に読み込みを行い、順番を1からに並べ替える。(構造体に入れなおす)
 
 
-入力による判定メソッド【methodSelect(int selectNum, int taskNum)】
-	一覧を表示後の操作コマンドで押された後、
-	コマンド内容によって編集と削除の動作を変え、(selectNum)   ｛編集【void sysInputUpdate(task_ptr)】削除【void delete(Task* task_ptr)】｝
-	TaskIDにデータが入っているかを確認し(taskNum) 編集/削除を実行する
+＜各メソッド一覧と概要＞
 
-配列を初期化するメソッド【delete(Task* task_ptr)】
-	指定された構造体の中身を全て初期化(元に戻す)する。
+	ユーザーの選択操作で行うメソッド
+	＜タスクの登録【void create(Task* task_ptr)】＞
+		タスクの内容を順に記述を求め、新規登録を実行する
 
-構造体の値を入れられたメンバ変数を編集するメソッド【void update(Task* task_ptr)】
-	編集して値を変えられる。
-	注意）更新日・時間も変わります。
+	＜タスクの確認【void confirmation(Task* task_ptr)】＞
+		TaskIDを選択
+		選んだTaskIDを全表示させ、実行するコマンドをユーザに求める
+		➀ 編集 ② 削除 ➂ 戻る（一覧に戻る）
+		➀と➁は、入力判定メソッドに処理が移る【methodSelect(int selectNum, int taskNum)】
+
+	＜タスクの削除【void delete(Task* task_ptr)】＞
+		削除するタスクを引数に設定する
+
+
+＜それ以外のメソッド＞
+	＜入力による判定メソッド【methodSelect(int selectNum, int taskNum)】＞
+		一覧を表示後の操作コマンドで押された後、
+		コマンド内容によって編集と削除の動作を変え、(selectNum)   ｛編集【void sysInputUpdate(task_ptr)】削除【void delete(Task* task_ptr)】｝
+		TaskIDにデータが入っているかを確認し(taskNum) 編集/削除を実行する
+
+	＜配列を初期化するメソッド【delete(Task* task_ptr)】＞
+		指定された構造体の中身を全て初期化(元に戻す)する。
+
+	＜構造体の値を入れられたメンバ変数を編集するメソッド【void update(Task* task_ptr)】＞
+		編集して値を変えられる。
+		注意）更新日・時間も変わります。
 
 
 
-	【全体図】
+＜全体図＞
 
 	一覧表示(ユーザー選択)------→ 新規登録【create(Task* task)】----→ 一覧に戻る
 						  ｜
-						  ｜--→ タスク表示【confirmation(Task* task_ptr)】---→ 編集【methodSelect(int selectNum, int taskNum)】----→【void update(Task* task_ptr)】
-						  ｜												  |-→ 削除【methodSelect(int selectNum, int taskNum)】----→【void delete(Task* task_ptr)】
-						  ｜--→ 削除	【void delete(Task* task_ptr)】	  |-→ 戻る（一覧に戻る）
+						  ｜--→ タスク表示【confirmation(Task* task_ptr, int num)】----------→ 編集【methodSelect(int selectNum, int taskNum)】----→【void update(Task* p_task, Task* task_ptr)】
+						  ｜															      |-→ 削除【methodSelect(int selectNum, int taskNum)】----→【void delete(Task* p_task, Task* task_ptr)】
+						  ｜--→ 削除【void delete(Task* p_task, Task* task_ptr)】	      |-→ 戻る（一覧に戻る）
 						  ｜
 						  ｜--→ 終了
 
 
+Ｃ言語の勉強として
+・#define
+・構造体（配列）
+・ポインタ（構造体ポインタ/アロー演算子/ポインタ変数）
+・ファイルの読み込み/書き込み
+・各分岐文
+・別ファイルからのメソッドの読み込み
 
 
-※1 primaryKey(TaskID)に関して
+＜ファイルの読み込み/書き込み＞
+	<stdio.h>				ファイル関数
+	FILE* ポインタ変数名;		ファイル操作前の宣言
+	
+	<ファイルを開く>
+		fopen_s(FILE型ポインタ変数, "読み込むファイル", "モード" )
+		ファイル型ポインタ変数はstadio.h内の構造体FILE型のポインタ変数を宣言したものを入れる。
+		モードは"r", "w", "a"があり、
+		r ＝ 読み込み、 w ＝ 上書き（ファイルの中身を書き換える）、 a ＝ 追記 （ファイルの中身を残して）
 
-primaryKeyの決定
-	primaryKeyは1から始まる。空いている配列番号(IDが0の構造体を探し、あれば+１をしてprimaryKeyを決める)
+	<ファイルの一行づつの読み込み>
+		while(fgets(格納変数, 読み込み容量(byte), FILE型ポインタ変数) 左に対しての条件（!= NULL等）)
+			sscanf(fgetsで格納した変数, "format(%データ型)", 格納する変数など);
 
-primaryKeyの選択
-	ユーザーはprimaryKeyを選択して操作できるようにする
-	primaryKeyは1からとなり、各配列番号は0から
-	つまり選択する際は、選択されたprimaryKey(TaskID) -1をして配列を参照する。
+	<ファイルへの記述>
+		fprintf(FILE型ポインタ変数, "format(%データ型)", 記述元の値（格納する変数など));
+
+	<ファイルを閉じる>
+		fclose(FILE型ポインタ変数);
+
+	sscanf()とfprintf()はフォーマット指定で変数を参照したりできるため記述しやすい。
+
+
+

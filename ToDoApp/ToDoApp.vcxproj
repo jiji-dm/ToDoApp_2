@@ -140,9 +140,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="gaiyou.txt" />
+    <Text Include="oldmain.txt" />
+    <Text Include="tasklist.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Confirmation.c" />
+    <ClCompile Include="Create.c" />
+    <ClCompile Include="Delete.c" />
+    <ClCompile Include="MethodSelect.c" />
     <ClCompile Include="ToDoApp.c" />
+    <ClCompile Include="Update.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Confirmation.h" />
+    <ClInclude Include="Create.h" />
+    <ClInclude Include="Delete.h" />
+    <ClInclude Include="MethodSelect.h" />
+    <ClInclude Include="Update.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

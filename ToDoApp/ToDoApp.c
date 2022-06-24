@@ -1,44 +1,61 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include<stdio.h>
-#include<time.h>
+#define _CRT_SECURE_NO_WARNINGS		//VSのC++コンパイラの警告を解放する
 
-typedef struct {
-	int id;					//プライマリーキー（必須）
-	char title[100];		//題名（必須）
-	char date[100];			//登録日（必須）
-	char deadLine[100];		//期限
-	char mainSubject[200];	//概要
-}Task;
+#include <stdio.h>
+#include "Create.h"		
+#include "Confirmation.h"
+#include "Delete.h"
+#include "MethodSelect.h"
+#include "Update.h"
 
-Task task[10];		//タスクの数１０件
-//Task* task_ptr;		//task[0]のポインタ変数
+extern FILE* fp;				//ファイル呼び出すための変数
 
-
-void create(Task *task_ptr);									//新規登録
-void confirmation(Task* task_ptr);				//内容確認(編集/削除)
-void delete(Task* task_ptr);					//削除
-void update(Task* task_ptr);			//編集時のUser入力をメンバ変数に格納するメソッド
-void methodSelect(int selectNum, int taskNum);	//変更/削除をするタスクのidと、使用するメソッドを条件分岐により動く
-
-time_t t;			//<time.h>のtime_t型から現在日時を取得する
-
-
-char line[100];		//sscanfで読み込むための変数
-int selectC;		//confirmation時の選択番号
-
-
+extern char line[LINEMAX];		//sscanfで読み込むための変数
+extern char f_line[LINEMAX];
 
 int main(void) {
-	
-	
 
 	//抜けるには終了を選択で選ぶ
 	while (1) {
 
-		//タスク一覧を表示させる(id + title)
-		int i;
+		/*テキストファイルからデータを読み込み、
+		構造体変数に格納してからidを１から順の番号にし、
+		順番を並び替えるために更新する
+		*/
 
+		/*** ファイルの読み込み ***/	
+		//ファイルを読み込みモードで開く
+		fopen_s(&fp, "tasklist.txt", "r");
+
+		int plus = 0;	//構造体配列の要素番号の初期化
+
+		//ファイルの中身を一行ずつ構造体メンバ変数に代入していく
+		while (fgets(f_line, LINEMAX, fp) != NULL){
+			sscanf(f_line, "%d %[^,], %[^,], %[^,], %[^\n]",
+				&task[plus].id, &task[plus].title, &task[plus].deadLine, &task[plus].mainSubject, &task[plus].date);
+				
+			//タスクIDを順番通りにする（配列の要素番号によってIDを変更する)
+			task[plus].id = plus + 1;
+				
+			plus++;
+		}
+		fclose(fp);
+
+		/*** ファイルの更新 ***/		
+		fopen_s(&fp, "tasklist.txt", "w");
+		int m;
+		#define M_TASK ()
+		for (m = 0; m < TASKMAX; m++) {
+			if (task[m].id != 0) {
+				fprintf(fp, "%d %s, %s, %s, %s\n",
+					task[m].id, task[m].title, task[m].deadLine, task[m].mainSubject, task[m].date);
+			}
+		}
+		fclose(fp);
+
+		/***呼び出した構造体をタスク一覧に表示 (id + title + 期限) ***/
+		int i;	//タスク要素番号の宣言
 		printf("| TaskID | Title | 期限  \n");
+
 		for (i = 0; i < 10; i++)
 		{
 			if (task[i].id != 0) {
@@ -46,7 +63,7 @@ int main(void) {
 			};
 		};
 
-		//選択フェーズ
+		/***タスク操作の選択***/
 		printf("タスク操作を操作、番号を入力してください\n");
 		printf("[1:新規登録] [2:詳細] [3:削除] [4:終了] ");
 		
@@ -55,7 +72,7 @@ int main(void) {
 		fgets(line, sizeof(line), stdin);
 		sscanf(line, "%d", &select);
 
-		//選択された番号(select)を条件分岐
+		//選択された番号(select)で条件分岐
 		switch (select)
 		{
 		case 1:
@@ -93,135 +110,3 @@ int main(void) {
 	return 0;
 };
 
-
-
-
-void methodSelect(int selectNum, int taskNum) {
-	
-	//入力されたタスク番号(taskNum)があるかを判定し、編集か削除(selectNum)でメソッドの処理を実行する
-	int num1;
-	
-	for (num1 = 0; num1 < sizeof(task); num1++) {
-		
-		if (taskNum == task[taskNum - 1].id) {
-			
-			switch(selectNum)
-			{
-			case 0:
-				confirmation(&task[taskNum - 1]);
-				break;
-
-			case 1:
-				delete(&task[taskNum - 1]);
-				break;
-
-			default:
-				break;
-			}
-			break;
-		}else {
-			printf("入力されたIDが見つかりません");
-		}
-	}
-		
-}
-
-void create(Task *task_ptr) {
-	printf("新規登録します\n表示された項目を入力してください\n");
-	int num2;
-	for (num2 = 0; num2 < sizeof(task_ptr); num2++) {
-		if ((task_ptr + num2)->id == 0)
-		{
-			//idが設定されていない(id = 0)配列を使用し,かつidを配列番号によって決める
-			(task_ptr + num2)->id = num2 + 1;
-			
-			printf("タスクのタイトルを入力してください(必須)\n");
-			fgets(line, sizeof(line), stdin);
-			sscanf(line, "%s", (task_ptr + num2)->title);
-
-			printf("タスクの期限を入力してください\n");
-			fgets(line, sizeof(line), stdin);
-			sscanf(line, "%s", (task_ptr + num2)->deadLine);
-
-			printf("タスクの概要があれば記入してください\n");
-			fgets(line, sizeof(line), stdin);
-			sscanf(line, "%s", (task_ptr + num2)->mainSubject);
-
-			//現在日時・時刻を取得
-			t = time(NULL);
-			struct tm* local = localtime(&t);
-
-			strftime((task_ptr + num2)->date, sizeof((task_ptr + num2)->date), "%Y/%m/%d %a %H:%M:%S %A", local);
-			
-			break;
-		}
-		else 
-		{	
-			if (num2 == 9) {
-				printf("タスクが最大件数であるため、新規登録するにはタスクを削除してください\n");
-				break;
-			}
-			//idが設定されている場合は、スキップする
-			continue;
-		}
-	}
-};
-
-void confirmation(Task *task_ptr) {
-	
-	while (1) {
-
-		printf("ID = %d\nタイトル = %s\n登録日 = %s\n期限日 = %s\n概要 = %s\n",
-			task_ptr->id, task_ptr->title, task_ptr->date, task_ptr->deadLine, task_ptr->mainSubject);
-
-		printf("[1:編集] [2:削除] [3:戻る] \n");
-		fgets(line, sizeof(line), stdin);
-		sscanf(line, "%d", &selectC);
-
-		switch (selectC)
-		{
-		case 1:
-			printf("編集します\n");
-			update(task_ptr);
-			continue;
-
-		case 2:
-			delete(task_ptr);
-			break;
-
-		case 3:
-			break;
-
-		default:
-			printf("正しく選択されていません\n");
-			continue;
-		}
-		break;
-	}
-};
-
-void delete(Task* task_ptr) {
-	memset(task_ptr, 0, sizeof(task));
-	printf("タスクを削除しました\n");
-};
-
-void update(Task* task_ptr) {
-
-	printf("タスクのタイトルを入力してください(必須)\n");
-	fgets(line, sizeof(line), stdin);
-	sscanf(line, "%s", task_ptr -> title);
-	
-	printf("タスクの期限を入力してください\n");
-	fgets(line, sizeof(line), stdin);
-	sscanf(line, "%s", task_ptr -> deadLine);
-
-	printf("タスクの概要があれば記入してください\n");
-	fgets(line, sizeof(line), stdin);
-	sscanf(line, "%s", task_ptr -> mainSubject);
-
-	//現在日時・時刻を取得
-	t = time(NULL);
-	struct tm* local = localtime(&t);
-
-	strftime(task_ptr->date, sizeof(task_ptr ->date), "%Y/%m/%d %a %H:%M:%S %A", local);
-}
